@@ -8,18 +8,18 @@
 
     `./start.sh`
 
-- Put json files to sent in **./data/to_send** folder.
+- Put json files to sent in **./data/to_send** folder (there are some files for testing in **./data/files_for_testing**).
 
 - Received files are located in **./data/received** folder.
 
-- Files already sent are moved to **./data/sent**
+- Files already sent are moved to **./data/sent**.
 
-- There are also error folders corresponding to error when sending or receiving files (**./data/sent_error** and **./data/received_error**).
-
-- There are some files for testing in **./data/files_for_testing**
+- There are also folders corresponding to errors when sending or receiving files (**./data/sent_error** and **./data/received_error**).
 
 ---
 ## Notes
+
+- To transmit the files over a network we are using sockets. Depending on the use case and/or infraestructure, we could use an sftp or a web server instead. Both of which could provide encryption (if we use an SSL connection for the web server). This way we shouldn't worry about encrypting and decrypting the files.
 
 - Next steps could be:
 
