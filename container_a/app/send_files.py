@@ -16,33 +16,36 @@ class NotFileException(Exception):
 class NotValidJSONException(Exception):
     pass
 
-class PipelineToSend:
+class XMLConversionException(Exception):
+    pass
+
+class PipelineSender:
 
     MOUNT_PATH = '/var/app/data/'
     SOURCE_PATH = MOUNT_PATH + 'to_send/'
     SENT_PATH = MOUNT_PATH + 'sent/'
     ERROR_PATH = MOUNT_PATH + 'sent_error/'
 
-    HOST = "host.docker.internal"
-    PORT = 5000
-    SEPARATOR = "||"
-    BUFFER_SIZE = 4096
+    HOST = os.getenv('HOST')
+    PORT = int(os.getenv('PORT'))
+    SEPARATOR = os.getenv('SEPARATOR')
+    BUFFER_SIZE = int(os.getenv('BUFFER_SIZE'))
 
-    def __init__(self, file):
-        self.file = file
-        self.path_file = self.SOURCE_PATH + file
-        self.json = None
-        self.xml = None
+    def __init__(self, file_name):
+        self.file_name = file_name
+        self.path_file = self.SOURCE_PATH + self.file_name
+        self.json_stream = None
+        self.xml_stream = None
         self.xml_file_name = None
-        self.logger = logging.getLogger('PipelineToSend')
+        self.logger = logging.getLogger('PipelineSender')
         self.log_details = {
             'extra' : {
-                'file': self.file + ' - '
+                'file': self.file_name + ' - '
             }
         }
 
     def execute(self):
-        self.logger.info(f'Processing file', **self.log_details)
+        self.logger.info(f'Processing file.', **self.log_details)
         try:
             self.valid_file()
             self.load_json()
@@ -63,7 +66,7 @@ class PipelineToSend:
     def load_json(self):
         with open(self.path_file, 'r') as f:
             try:
-                self.json = json.load(f)
+                self.json_stream = json.load(f)
                 self.logger.info('Json file loaded.', **self.log_details)
             except JSONDecodeError as e:
                 self.logger.error('Error decodng json.', **self.log_details)
@@ -71,21 +74,17 @@ class PipelineToSend:
 
     def convert_to_xml(self):
         try:
-            self.xml = dicttoxml(self.json)
+            self.xml_stream = dicttoxml(self.json_stream)
             self.logger.info('File converted to xml succesfully.', **self.log_details)
         except:
             self.logger.error('Error when converting json to xml.', **self.log_details)
-            raise Exception
+            raise XMLConversionException
 
     def cipher(self):
         pass
 
-    def clean(self):
-        shutil.move(self.path_file, self.ERROR_PATH + self.file)
-        self.logger.error(f'File moved to {self.ERROR_PATH}.', **self.log_details)
-
     def send_xml(self):
-        self.xml_file_name = self.rename_file(self.file)
+        self.xml_file_name = self.rename_file(self.file_name)
         s = socket.socket()
         self.logger.info(f'Connecting to {self.HOST}:{self.PORT}', **self.log_details)
         s.connect((self.HOST, self.PORT))
@@ -94,7 +93,7 @@ class PipelineToSend:
             f'Sending file {self.xml_file_name}',
             **self.log_details
         )
-        f = io.BytesIO(f"{self.xml_file_name}{self.SEPARATOR}".encode() + self.xml)
+        f = io.BytesIO(f"{self.xml_file_name}{self.SEPARATOR}".encode() + self.xml_stream)
         while True:
             bytes_read = f.read(self.BUFFER_SIZE)
             if not bytes_read:
@@ -104,8 +103,16 @@ class PipelineToSend:
         s.close()
 
     def move_json(self):
-        shutil.move(self.path_file, self.SENT_PATH + self.file)
+        shutil.move(self.path_file, self.SENT_PATH + self.file_name)
         self.logger.info(f'Json file moved to folder "{self.SENT_PATH}"', **self.log_details)
+
+    def clean(self):
+        shutil.move(self.path_file, self.ERROR_PATH + self.file_name)
+        self.logger.error(f'File moved to {self.ERROR_PATH}.', **self.log_details)
+
+    @staticmethod
+    def rename_file(file):
+        return re.sub('.json$', '.xml', file)
 
     @classmethod
     def check_new_files(cls):
@@ -115,20 +122,16 @@ class PipelineToSend:
     def process_files(cls, files):
         for file in files:
             cls(file).execute()
-            time.sleep(5)
-
-    @staticmethod
-    def rename_file(file):
-        return re.sub('.json$', '.xml', file)
+            time.sleep(0)
 
 
 if __name__=='__main__':
     from shared.logger import getLogger
-    logger = getLogger('PipelineToSend')
+    logger = getLogger('PipelineSender')
     logger.info("Waiting for json files...")
     while True:
-        files = PipelineToSend.check_new_files()
+        files = PipelineSender.check_new_files()
         if files:
-            PipelineToSend.process_files(files)
+            PipelineSender.process_files(files)
             logger.info("Waiting for json files...")
         time.sleep(1)

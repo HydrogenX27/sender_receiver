@@ -2,35 +2,22 @@ version: '3.8'
 services:
   sender:
     build: ./container_a
-    # ports:
-    #   - '5002:5000'
     volumes:
       - ./container_a/app:/usr/src/app
       - ./shared:/usr/src/app/shared
       - ./data/to_send:/var/app/data/to_send
       - ./data/sent:/var/app/data/sent
       - ./data/sent_error:/var/app/data/sent_error
-      # - ./data/received:/var/app/data/received
-      # - ./data/received_error:/var/app/data/received_error
+    env_file:
+      - ./container_a/container_a.env
   receiver:
     build: ./container_b
-    ports:
-      - '5000:5000'
     volumes:
       - ./container_b/app:/usr/src/app
       - ./shared:/usr/src/app/shared
       - ./data/received:/var/app/data/received
       - ./data/received_error:/var/app/data/received_error
-    # command: "bash"
-    # stdin_open: true
-    # tty: true
-    # env_file:
-    #   - ./env/backend.env
-#   frontend:
-#     build: ./frontend
-#     ports:
-#       - '3000:3000'
-#     volumes:
-#       - ./frontend/src:/app/src
-#     depends_on:
-#       - backend
+    env_file:
+      - ./container_b/container_b.env
+    depends_on:
+      - sender
