@@ -133,7 +133,7 @@ class PipelineSender:
         now = datetime.now().strftime("%Y%m%d_%H%M%S.%f")
         error_file_name = f'{self.file_name}_{now}'
         shutil.move(self.path_file, self.ERROR_PATH + error_file_name)
-        self.log_info(f'File moved to {self.ERROR_PATH}.')
+        self.log_info(f'File moved to folder "{self.ERROR_PATH}"".')
 
     def connect_socket(self):
         try:

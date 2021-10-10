@@ -23,13 +23,11 @@
 ---
 ## Notes
 
-- To transmit the files over a network we are using sockets. Depending on the use case and/or infraestructure, we could use higuer level tools like an sftp or a web server instead. Both of which could provide encryption (if we use an SSL connection for the web server). This way we shouldn't worry about encrypting and decrypting the files.
+- We are using sockets to transmit the files over a network. Depending on the use case and/or infraestructure, we could use higuer level tools like an sftp or a web server instead. Both of which could provide encryption (if we use an SSL connection for the web server). This way we shouldn't worry about encrypting and decrypting the files.
 
 - For encryption we are using a symmetric algorithm, so we assume that there is a secure way to distribute the key. If that is not the case we must use an asymmetric algorithm like RSA.
 
 - The private key is passed as an environment variable. It could also be generated automatically while deployment with an init container.
-
-- We added a checksum to check the integrity of the file.
 
 - The slowest part of the pipeline is the conversion from json to xml which 
 relies on a third party library.
@@ -40,3 +38,4 @@ relies on a third party library.
 
 	- Include a database to store information about sent and received files.
     - Support several connections at the same time.
+    - Add a checksum to check the integrity of the file.
