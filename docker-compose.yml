@@ -3,8 +3,8 @@ services:
   sender:
     build: ./container_a
     volumes:
-      - ./container_a/app:/usr/src/app
-      - ./shared:/usr/src/app/shared
+      - ./container_a/app:/home/app
+      - ./shared:/home/app/shared
       - ./data/to_send:/var/app/data/to_send
       - ./data/sent:/var/app/data/sent
       - ./data/sent_error:/var/app/data/sent_error
@@ -17,15 +17,15 @@ services:
   receiver:
     build: ./container_b
     volumes:
-      - ./container_b/app:/usr/src/app
-      - ./shared:/usr/src/app/shared
+      - ./container_b/app:/home/app
+      - ./shared:/home/app/shared
       - ./data/received:/var/app/data/received
       - ./data/received_error:/var/app/data/received_error
     env_file:
       - ./env/container_b.env
       - ./env/shared.env
+    # depends_on:
+    #   - sender
     # command: 'bash'
     # stdin_open: true
     # tty: true
-    # depends_on:
-    #   - sender

@@ -1,2 +1,2 @@
-dicttoxml==1.7.4
+json2xml==3.8.2
 cryptography==35.0.0

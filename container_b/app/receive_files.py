@@ -66,7 +66,7 @@ class PipelineToReceive:
         self.log_info(f'File saved to {self.RECEIVED_PATH}.')
 
     def clean(self):
-        now = datetime.now().strftime("%Y_%m_%d_%H%M%S.%f")
+        now = datetime.now().strftime("%Y%m%d_%H%M%S.%f")
         error_file_name = f'{self.file_name}_{now}'
         with open(self.ERROR_PATH + error_file_name, 'wb') as f:
             f.write(self.encrypted_bytes)

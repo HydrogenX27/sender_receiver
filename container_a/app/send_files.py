@@ -7,7 +7,7 @@ import shutil
 import logging
 import socket
 from datetime import datetime
-from dicttoxml import dicttoxml
+from json2xml import json2xml
 from json.decoder import JSONDecodeError
 from cryptography.fernet import Fernet
 
@@ -83,7 +83,11 @@ class PipelineSender:
 
     def convert_to_xml(self):
         try:
-            self.xml = dicttoxml(self.json)
+            self.xml = json2xml.Json2xml(
+                self.json,
+                wrapper="root",
+                pretty=True
+            ).to_xml().encode()
             self.log_info('File converted to xml succesfully.')
         except Exception as e:
             self.log_error('Error when converting json to xml.')
@@ -108,7 +112,7 @@ class PipelineSender:
         s = self.connect_socket()
         try:
             f = io.BytesIO(self.encrypted_xml)
-            self.log_info(f'Sending file {self.xml_file_name}')
+            self.log_info(f'Sending file: "{self.xml_file_name}"')
             while True:
                 bytes_read = f.read(self.BUFFER_SIZE)
                 if not bytes_read:
@@ -126,7 +130,7 @@ class PipelineSender:
         self.log_info(f'Json file moved to folder "{self.SENT_PATH}"')
 
     def clean(self):
-        now = datetime.now().strftime("%Y_%m_%d_%H%M%S.%f")
+        now = datetime.now().strftime("%Y%m%d_%H%M%S.%f")
         error_file_name = f'{self.file_name}_{now}'
         shutil.move(self.path_file, self.ERROR_PATH + error_file_name)
         self.log_info(f'File moved to {self.ERROR_PATH}.')

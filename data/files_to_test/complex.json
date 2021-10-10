@@ -1,0 +1,18 @@
+{
+    "array": [
+        34,
+        null,
+        {
+            "boolean": false
+        },
+        {
+            "nested_object": {
+                "level_1": {
+                    "level_2": {
+                        "level_3": 3.1415926535
+                    }
+                }
+            }
+        }
+    ]
+}
