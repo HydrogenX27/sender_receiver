@@ -1,8 +1,15 @@
 import os
-import io
 import socket
 import logging
+from datetime import datetime
+from cryptography.fernet import Fernet
 
+
+class DecryptionException(Exception):
+    pass
+
+class MetadataException(Exception):
+    pass
 
 class PipelineToReceive:
 
@@ -12,50 +19,82 @@ class PipelineToReceive:
 
     SERVER_HOST = os.getenv('SERVER_HOST')
     SERVER_PORT = int(os.getenv('SERVER_PORT'))
-    SEPARATOR = os.getenv('SEPARATOR')
     BUFFER_SIZE = int(os.getenv('BUFFER_SIZE'))
+    SEPARATOR = os.getenv('SEPARATOR')
 
-    def __init__(self, file_name, stream):
-        self.file_name = file_name
-        self.stream = stream
+    PRIVATE_KEY = os.getenv('PRIVATE_KEY')
+
+    def __init__(self, bytes_):
+        self.encrypted_bytes = bytes_
+        self.decrypted_string = None
+        self.file_name = None
+        self.xml = None
         self.logger = logging.getLogger('PipelineReceiver')
-        self.log_details = {
-            'extra' : {
-                'file': self.file_name + ' - '
-            }
-        }
 
     def execute(self):
-        self.logger.info(f'Processing file.', **self.log_details)
+        self.log_info(f'Processing file.')
         try:
+            self.decrypt()
+            self.get_metadata()
             self.write_xml()
         except:
-            self.logger.exception("Unexpected error.", **self.log_details)
+            self.log_error("Unexpected error.")
             self.clean()
 
+    def decrypt(self):
+        try:
+            f = Fernet(self.PRIVATE_KEY)
+            self.decrypted_string = f.decrypt(self.encrypted_bytes).decode()
+            self.log_info('Decryption succesful.')
+        except Exception as e:
+            self.log_error('Error while decrypting data.')
+            raise DecryptionException(e)
+
+    def get_metadata(self):
+        try:
+            file_name, *remaining = self.decrypted_string.split(self.SEPARATOR)
+            self.file_name = file_name
+            self.xml = ''.join(remaining)
+            self.log_info('Metadata obtained succesfully.')
+        except Exception as e:
+            self.log_error('Error while getting metadata.')
+            raise MetadataException(e)
+
     def write_xml(self):
-        with open(self.RECEIVED_PATH + self.file_name, 'wb') as f:
-            f.write(self.stream.getbuffer())
+        with open(self.RECEIVED_PATH + self.file_name, 'w') as f:
+            f.write(self.xml)
+        self.log_info(f'File saved to {self.RECEIVED_PATH}.')
 
     def clean(self):
-        with open(self.ERROR_PATH + self.file_name, 'wb') as f:
-            f.write(self.stream.getbuffer())
+        now = datetime.now().strftime("%Y_%m_%d_%H:%M:%S.%f")
+        error_file_name = f'{self.file_name}_{now}'
+        with open(self.ERROR_PATH + error_file_name, 'wb') as f:
+            f.write(self.encrypted_bytes)
+        self.log_info(f'Encrypted stream saved to {self.ERROR_PATH}')
+
+    def log_info(self, msg):
+        self.logger.info(msg, extra={
+            'file': f'{self.file_name} - ' if self.file_name else ''
+        })
+
+    def log_error(self, msg):
+        self.logger.error(msg, extra={
+            'file': f'{self.file_name} - '  if self.file_name else ''
+        })
 
     @classmethod
     def wait_for_file(cls):
         try:
             client_socket, address = socket.accept() 
             logger.info(f"Connection established with {address}.")
-            received = client_socket.recv(cls.BUFFER_SIZE).decode()
-            file_name, *remaining = received.split(cls.SEPARATOR)
-            logger.info(f'Receiving file {file_name}')
-            stream = io.BytesIO()
-            stream.write(''.join(remaining).encode())
+            logger.info(f'Receiving file.')
+            stream = b''
             while True:
                 bytes_read = client_socket.recv(cls.BUFFER_SIZE)
                 if not bytes_read:    
                     break
-            return file_name, stream
+                stream += bytes_read
+            return stream
         finally:
             client_socket.close()
 
@@ -68,8 +107,8 @@ class PipelineToReceive:
             logger.info(f'Listening on {cls.SERVER_HOST}:{cls.SERVER_PORT}')
             while True:
                 logger.info('Waiting for xml files...')
-                file_name, stream = cls.wait_for_file()
-                cls(file_name, stream).execute()
+                stream = cls.wait_for_file()
+                cls(stream).execute()
         finally:
             socket.close()
 

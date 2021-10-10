@@ -9,7 +9,11 @@ services:
       - ./data/sent:/var/app/data/sent
       - ./data/sent_error:/var/app/data/sent_error
     env_file:
-      - ./container_a/container_a.env
+      - ./env/container_a.env
+      - ./env/shared.env
+    # command: 'bash'
+    # stdin_open: true
+    # tty: true
   receiver:
     build: ./container_b
     volumes:
@@ -18,6 +22,10 @@ services:
       - ./data/received:/var/app/data/received
       - ./data/received_error:/var/app/data/received_error
     env_file:
-      - ./container_b/container_b.env
-    depends_on:
-      - sender
+      - ./env/container_b.env
+      - ./env/shared.env
+    # command: 'bash'
+    # stdin_open: true
+    # tty: true
+    # depends_on:
+    #   - sender

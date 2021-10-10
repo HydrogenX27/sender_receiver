@@ -1,1 +1,2 @@
 dicttoxml==1.7.4
+cryptography==35.0.0
