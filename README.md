@@ -1,8 +1,8 @@
 # Coding test
 
-- Give execution permission to 'start.sh' file.
+- Give execution permission to 'start.sh' and 'down.sh' file.
 
-    `chmod u+x ./start.sh`
+    `chmod u+x ./start.sh ./down.sh`
 
 - Start the containers
 
@@ -16,16 +16,25 @@
 
 - There are also folders corresponding to errors when sending or receiving files (**./data/sent_error** and **./data/received_error**).
 
+- To remove containers and images execute
+
+    `./down.sh`
+
 ---
 ## Notes
 
-- To transmit the files over a network we are using sockets. Depending on the use case and/or infraestructure, we could use an sftp or a web server instead. Both of which could provide encryption (if we use an SSL connection for the web server). This way we shouldn't worry about encrypting and decrypting the files.
+- To transmit the files over a network we are using sockets. Depending on the use case and/or infraestructure, we could use higuer level tools like an sftp or a web server instead. Both of which could provide encryption (if we use an SSL connection for the web server). This way we shouldn't worry about encrypting and decrypting the files.
 
 - For encryption we are using a symmetric algorithm, so we assume that there is a secure way to distribute the key. If that is not the case we must use an asymmetric algorithm like RSA.
 
 - The private key is passed as an environment variable. It could also be generated automatically while deployment with an init container.
 
 - We added a checksum to check the integrity of the file.
+
+- The slowest part of the pipeline is the conversion from json to xml which 
+relies on a third party library.
+
+- Depending on the rate of file to transmit or the size of the files, the code could be optimized for the use case.
 
 - Next steps could be:
 

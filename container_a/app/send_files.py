@@ -6,6 +6,7 @@ import time
 import shutil
 import logging
 import socket
+from datetime import datetime
 from dicttoxml import dicttoxml
 from json.decoder import JSONDecodeError
 from cryptography.fernet import Fernet
@@ -61,8 +62,8 @@ class PipelineSender:
             self.encrypt()
             self.send_xml()
             self.move_json()                
-        except:
-            self.logger.exception("Unexpected error.")
+        except Exception as e:
+            self.logger.error(f"Unexpected error: {e}")
             self.clean()
     
     def valid_file(self):
@@ -125,8 +126,10 @@ class PipelineSender:
         self.log_info(f'Json file moved to folder "{self.SENT_PATH}"')
 
     def clean(self):
-        shutil.move(self.path_file, self.ERROR_PATH + self.file_name)
-        self.log_error(f'File moved to {self.ERROR_PATH}.')
+        now = datetime.now().strftime("%Y_%m_%d_%H%M%S.%f")
+        error_file_name = f'{self.file_name}_{now}'
+        shutil.move(self.path_file, self.ERROR_PATH + error_file_name)
+        self.log_info(f'File moved to {self.ERROR_PATH}.')
 
     def connect_socket(self):
         try:
@@ -151,14 +154,12 @@ class PipelineSender:
 
     @classmethod
     def check_new_files(cls):
-        return os.listdir(cls.SOURCE_PATH)
+        return sorted(os.listdir(cls.SOURCE_PATH))
 
     @classmethod    
     def process_files(cls, files):
         for file in files:
             cls(file).execute()
-            time.sleep(10)
-
 
 if __name__=='__main__':
     from shared.logger import getLogger
