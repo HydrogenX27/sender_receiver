@@ -1,6 +1,7 @@
 FROM python:3.10.0-bullseye
 
 ARG USER=app
+ARG SERVER_PORT
 
 RUN apt update && apt upgrade -y && rm -rf /var/lib/apt/lists/*
 
@@ -17,6 +18,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ./app .
 
 RUN chown -R $USER:$USER /home/$USER;
+
+EXPOSE $SERVER_PORT
 
 USER $USER
 
