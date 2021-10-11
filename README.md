@@ -43,3 +43,4 @@ relies on a third party library.
 	- Include a database to store information about sent and received files.
     - Support several connections at the same time.
     - Add a checksum to check the integrity of the file.
+    - Write unitary and integration tests.
