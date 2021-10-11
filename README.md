@@ -4,7 +4,7 @@ Solution fo the coding test described in file 'Docker+Python.txt'.
 
 To start up follow these steps:
 
-- Give execution permission to 'start.sh' and 'down.sh' file.
+- Give execution permission to 'start.sh' and 'down.sh' files.
 
     `chmod u+x ./start.sh ./down.sh`
 
@@ -18,7 +18,7 @@ To start up follow these steps:
 
 - Files already sent are moved to **./data/sent**.
 
-- There are also folders corresponding to errors when sending or receiving files (**./data/sent_error** and **./data/received_error**).
+- There are also folders corresponding to errors when sending or receiving files (**./data/sent_error** and **./data/received_error**). A timestamp is added to the file name.
 
 - To remove containers and images execute
 

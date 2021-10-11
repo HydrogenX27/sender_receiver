@@ -158,7 +158,9 @@ class PipelineSender:
 
     @classmethod
     def check_new_files(cls):
-        return sorted(os.listdir(cls.SOURCE_PATH))
+        return sorted([
+            f for f in os.listdir(cls.SOURCE_PATH) if not f.startswith('.')
+        ])
 
     @classmethod    
     def process_files(cls, files):
