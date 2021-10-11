@@ -1,5 +1,9 @@
 # Coding test
 
+Solution fo the coding test described in file 'Docker+Python.txt'.
+
+To start up follow these steps:
+
 - Give execution permission to 'start.sh' and 'down.sh' file.
 
     `chmod u+x ./start.sh ./down.sh`
@@ -23,7 +27,7 @@
 ---
 ## Notes
 
-- We are using sockets to transmit the files over a network. Depending on the use case and/or infraestructure, we could use higuer level tools like an sftp or a web server instead. Both of which could provide encryption (if we use an SSL connection for the web server). This way we shouldn't worry about encrypting and decrypting the files.
+- We are using sockets to transmit the files over a network. Depending on the use case and/or infraestructure, we could use higher level tools like an sftp or a web server instead. Both of which could provide encryption (if we use an SSL connection for the web server). This way we don't have to worry about encrypting and decrypting the files.
 
 - For encryption we are using a symmetric algorithm, so we assume that there is a secure way to distribute the key. If that is not the case we must use an asymmetric algorithm like RSA.
 
@@ -32,7 +36,7 @@
 - The slowest part of the pipeline is the conversion from json to xml which 
 relies on a third party library.
 
-- Depending on the rate of file to transmit or the size of the files, the code could be optimized for the use case.
+- Depending on the rate of files to transmit or the size of the files, we can think of ways to optimize the code.
 
 - Next steps could be:
 
