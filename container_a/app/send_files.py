@@ -127,13 +127,13 @@ class PipelineSender:
 
     def move_json(self):
         shutil.move(self.path_file, self.SENT_PATH + self.file_name)
-        self.log_info(f'Json file moved to folder "{self.SENT_PATH}"')
+        self.log_info(f'Json file moved to folder "{self.SENT_PATH}".')
 
     def clean(self):
         now = datetime.now().strftime("%Y%m%d_%H%M%S.%f")
         error_file_name = f'{self.file_name}_{now}'
         shutil.move(self.path_file, self.ERROR_PATH + error_file_name)
-        self.log_info(f'File moved to folder "{self.ERROR_PATH}"".')
+        self.log_info(f'File moved to folder "{self.ERROR_PATH}".')
 
     def connect_socket(self):
         try:

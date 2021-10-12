@@ -37,8 +37,8 @@ class PipelineToReceive:
             self.decrypt()
             self.get_metadata()
             self.write_xml()
-        except:
-            self.log_error("Unexpected error.")
+        except Exception as e:
+            self.log_error(f'Unexpected error: {e}.')
             self.clean()
 
     def decrypt(self):
