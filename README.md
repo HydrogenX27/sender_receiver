@@ -1,6 +1,6 @@
 # Coding test
 
-Solution fo the coding test described in file 'Docker+Python.txt'.
+Solution for the coding test described in file 'Docker+Python.txt'.
 
 To start up follow these steps:
 
